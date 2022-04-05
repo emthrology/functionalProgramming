@@ -119,7 +119,7 @@ go(
 )
 console.clear();
 //-----------------------curry---------------
-//함수를 값으로 다루면서 받아둔 함수를 원하는 때 평가시키는 함수
+//두 개 이상인 인자들의 받는 때를 구분하여 원하는 때 평가를 시킬 수 있게(함수가 작동하게) 만듦
 const curry = f => (a,..._) => _.length? f(a, ..._) : (..._) => f(a, ..._);
 const multi = curry((a,b) => a * b);
 console.log(multi(3)); //(3,b) => 3 * b
@@ -164,15 +164,15 @@ go(
  */
 go(
   products,
-  products => curryFilter(p => p.price <20000)(products),
+  products => curryFilter(p => p.price < 20000)(products),
   products => curryMap(p => p.price)(products),
   prices => curryReduce((acc,cur) => acc + cur)(prices),
   console.log
 );
-//커리는 다음 파라미터를 받기를 대기하는 상태로 만들어두는게 목적이므로 product 생략 가능
+//products 를 파라미터로 받아서 가운데 커리된 함수에 products 를 그대로 던지는 매개함수는 필요없음
 go(
   products,
-  curryFilter(p => p.price <20000),
+  curryFilter(p => p.price < 20000),
   curryMap(p => p.price),
   curryReduce((acc,cur) => acc + cur),
   console.log

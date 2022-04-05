@@ -43,7 +43,8 @@
       curryReduce(add)
     ));
     //products => sum(p => p.quantity)(products)
-    // 단순히 가운데 평가함수에 products를 던지기만하는 함수이므로 생략 하는게 맞다
+    // 단순히 가운데 평가함수에 products를 던지기만 하는 함수이므로 생략 하는게 맞다
+    //iter 를 던지는건 curried의 호출부에서
     const total_quality_by_sum = sum(p => p.quantity);
     const total_price_by_sum = sum(p => p.price * p.quantity)
     console.log(total_quality_by_sum(products2));
