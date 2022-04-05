@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>cartExample</title>
+    <script src="./iterates.js"></script>
+</head>
+<body>
+<div id="cart">
+
+</div>
+<script>
+    const products2= [
+        {name: '반팔티', price: 15000, quantity: 1, isSelected: true},
+        {name: '긴팔티', price: 20000, quantity: 2, isSelected: false},
+        {name: '핸트폰케이스', price: 15000, quantity: 3, isSelected: true},
+        {name: '후드티', price: 30000, quantity: 4, isSelected: false},
+        {name: '바지', price: 25000, quantity: 5, isSelected: false},
+    ]
+    //총 수량
+    // const total_quantity = products => go (products,
+    //   curryMap(p => p.quantity),
+    //   curryReduce((acc,cur) => acc + cur),
+    // )
+    //-----------리팩토링
+    // const total_quantity = pipe(
+    //   curryMap(p => p.quantity),
+    //   curryReduce((acc,cur) => acc + cur),
+    // );
+    // console.log(total_quantity(products2));
+    //
+    //총 가격
+    // const total_price2 = pipe(
+    //   curryMap(p => p.price),
+    //   curryReduce((acc,cur) => acc + cur),
+    // )
+    // console.log(total_price2(products2))
+    //----------리팩토링
+    const add = (a,b) => a+b;
+    const sum = curry((f, iter) => go(
+      iter,
+      curryMap(f),
+      curryReduce(add)
+    ));
+    //products => sum(p => p.quantity)(products)
+    // 단순히 가운데 평가함수에 products를 던지기만하는 함수이므로 생략 하는게 맞다
+    const total_quality_by_sum = sum(p => p.quantity);
+    const total_price_by_sum = sum(p => p.price * p.quantity)
+    console.log(total_quality_by_sum(products2));
+    console.log(total_price_by_sum(products2));
+
+    document.querySelector('#cart').innerHTML = `
+        <table>
+            <tr>
+                <th></th>
+                <th>상품명</th>
+                <th>가격</th>
+                <th>수량</th>
+                <th>충 가격</th>
+            </tr>
+            ${go(products2,
+              sum(p => `
+                <tr>
+                    <td><input type="checkbox" ${p.isSelected ? 'checked' : ''}></td>
+                    <td>${p.name}</td>
+                    <td>${p.price}</td>
+                    <td><input type="number" value="${p.quantity}"> </td>
+                    <td>${p.price * p.quantity}</td>
+                </tr>
+              `)
+            )}
+            <tr>
+                <td colspan="3">합계</td>
+                <td>${total_quality_by_sum(curryFilter(p => p.isSelected,products2))}</td>
+                <td>${total_price_by_sum(curryFilter(p => p.isSelected,products2))}</td>
+            </tr>
+        </table>
+    `
+</script>
+</body>
+</html>
