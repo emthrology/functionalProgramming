@@ -1,46 +1,23 @@
+import {curry, go, pipe, map, range, filter, reduce, take, L} from './fx.js'
 
-//generator : 이터레이터 / 이터러블을 리턴하는 함수
-function *gen() {
-  yield 1;
-  if(false) yield 2; //순회할 값을 선언 or 명령 가능
-  yield 3;
-  return 100; //done:true , 순회할 때는 반환되지 않음
-}
+//즉시평가
+// go(range(10),
+//   map(n=>n + 10),
+//   filter(n => n %2),
+//   take(2),
+//   console.log
+// )
 
-let iter = gen();
-//
-// console.log(iter.next())
-// console.log(iter.next())
-// console.log(iter.next())
-// console.log(iter.next())
-// console.log(iter[Symbol.iterator]() === iter)
-//
-// for(const a of gen()) console.log(a)
+//지연평가
+go(L.range(10),
+  L.map(n=>n + 10),
+  L.filter(n => n %2),
+  take(2),
+  console.log
+)
 
-//i+1 한 숫자를 생산하는 제너레이터
-function *infinity(i = 0) {
-  while(true) yield i++;
-}
-//l 까지 iter 를 반복하는 제너레이터 (제너레이터도 이터레이터)
-function *limit(l,iter) {
-  for(const a of iter) {
-    yield a;
-    if(a === l) return;
-  }
-}
-function *odds(l) {
-  for(const a of limit(l,infinity(1))) {
-    if(a % 2) yield a;
-  }
-}
-
-for(const a of odds(40)) {
-  console.log(a)
-}
-
-//스프레드, 구조분해에서의 제너레이터
-console.log(...odds(100)) //[1,3,...,97,99]
-
-const [head,...rest] = odds(5);
-console.log(head) //1
-console.log(rest) //[3,5]
+//TODO 각 함수의 res,cur, push, 보조함수 등에 breakpoint 를 찍어서 확인해볼 것
+//즉시평가방식은 각 라인에서 자신이 받은 인자(iterable)를 모두 실행시킨 결과를 다음 인자에 던져줌
+//지연평가방식은 평가가 필요해진 시점에 인자를 inter.next() 단위로 하나씩 단계별로 평가함
+//코드 진행의 방향성 면에서 설명하면 즉시평가는 주로 가로방향, 지연평가는 주로 세로방향으로 연산이 발생함
+//시간복잡성을 측면에서는 매 라인마다 반복하는 즉시평가방식보다 지연평가방식이 유리한 측면이 있다고 봄
