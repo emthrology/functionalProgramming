@@ -40,3 +40,102 @@ map,filter 계열 함수들이 가지는 결합 법칙
 =
 [[mapping, filtering, mapping],[mapping, filtering, mapping]] //지연평가방식
  */
+
+console.clear();
+//----------------결과를 만드는 함수 reduce, take
+//Object.entries 지연평가화
+L.entries = function *(obj) {
+  for(const k in obj) yield [k, obj[k]];
+}
+//Array.prototype.join() 을 더 쓰기 쉽게
+const join = curry((sep = ',', iter) => reduce((acc, cur) => `${acc}${sep}${cur}`, iter));
+const queryStr = pipe(
+  // Object.entries,
+  L.entries,
+  L.map(([k,v]) => `${k}=${v}`),
+  // reduce((acc,cur) => `${acc}&${cur}`)
+  join('&'),
+)
+//위 코드의 지연평가화 리펙토링 과정
+
+console.log(queryStr({
+  limit: 10,
+  offset: 10,
+  type: 'notice'
+}));
+
+function *a() {
+  yield 11;
+  yield 12;
+  yield 13;
+  yield 14;
+}
+
+console.log('----------------')
+console.log(a)
+console.log(a())
+console.log(a().next())
+go(
+  a(),
+  join(' - '),
+  console.log
+)
+
+
+console.clear();
+//------------------take,find
+const users = [
+  {age: 32},
+  {age: 31},
+  {age: 26},
+  {age: 28},
+  {age: 31},
+  {age: 32},
+  {age: 37},
+  {age: 25}
+];
+//즉시평가방식
+// const find = f => pipe (
+//   filter(f), //여기서 전부 순회하고있음
+//   take(1), //여기서도 두 개 객체가 리턴되고 있음
+//   ([a]) => a
+// );
+//지연평가방식
+const find = curry((f, iter) => go(
+  iter,
+  L.filter(f), //평가 보류
+  take(1), //invoke evaluation : 지연평가부분의 iter.next() 발동
+  ([a]) => a
+));
+const findUnder30 = find(u => u.age < 30);
+console.log(findUnder30(users));
+
+//----------L.map을 활용한 map 리팩토링
+// const map = curry((f, iter) => {
+//   let res = [];
+//   iter = iter[Symbol.iterator]();
+//   let cur;
+//   while (!(cur = iter.next()).done) {
+//     const p = cur.value;
+//     res.push(f(p))
+//   }
+//   return res;
+// });
+const mapRepectored = curry(
+  //1단계: (f,iter) => go (
+  // iter,
+  // L.map(f),
+  // take(Infinity)
+  //));
+
+  //2단계: L.map(f,iter) //L.map 도 커링되어있기 때문에 따로 받든 같이 받든 상관없다
+
+  //3단계: (f,iter) 를 받아서 L.map 에 그대로 (f,iter)를 던지기 때문에 pipe 로 줄일 수 있다
+  pipe(
+  L.map,
+  take(Infinity)
+))
+//마찬가지로 filter 도 L.filter 로 리팩토링 가능
+const filterRepectored = curry (
+  pipe(L.filter, take(Infinity))
+)
