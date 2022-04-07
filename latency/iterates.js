@@ -82,7 +82,7 @@ go(
 console.clear();
 //-------------pipe-----------------
 //합성함수 만들기 (합성된 '함수'를 리턴하는 함수) (f(g(h(...(x)))) 대신 F = ...hogof 로 선언하는 꼴
-const pipe = (...args) => (acc) => go(acc,...args);
+const pipe = (...fs) => (a) => go(a,...fs);
 const f = pipe(
   a => a + 1,
   a => a + 10,
@@ -93,7 +93,7 @@ console.log(f(100));
 //첫번째 인자의 함수를 따로 다루는 버전
 //첫번째로 전해지는 함수의 매개변수가 한 개 이상인 경우
 //js 스팩 상 파라미터 여러개를 단축 표현할 때 스프레드를 사용한다
-const pipeExtend = (f,...args) => (...arg) => go(f(...arg), ...args);
+const pipeExtend = (f,...fs) => (...as) => go(f(...as), ...fs);
 const e = pipeExtend(
   (a,b) => a*b,
   a => a+10,
