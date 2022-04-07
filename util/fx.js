@@ -1,6 +1,6 @@
 const curry = f => (a,..._) => _.length? f(a, ..._) : (..._) => f(a, ..._);
-const go = (...args) => reduce((acc,cur) => cur(acc), args);
-const pipe = (...args) => (acc) => go(acc,...args);
+const go = (...args) => reduce((acc,curFn) => curFn(acc), args);
+const pipe = (f,...fs) => (...as) => go(f(...as), ...fs);
 const range = l => {
   let i = -1;
   let res = [];
@@ -99,4 +99,18 @@ L.filter = curry(function* (f, iter) {
   //   if (f(a)) yield a
   // }
 });
-export {curry, go, pipe, range, map, filter, reduce, take, L}
+const isIterable = a => a && a[Symbol.iterator];
+L.flatten = function *(iter) {
+  for(const a of iter) {
+    // if(isIterable(a)) for (const b of a) yield b;
+    if(isIterable(a)) yield *a;
+    else yield a;
+  }
+};
+//즉시반환형 flatter
+const flatten = pipe(L.flatten,take(Infinity));
+//지연평가형 L.flatMap
+L.flatMap = curry(pipe(L.map, L.flatten));
+//즉시평가형 flatMap
+const flatMap = curry(pipe(L.flatMap, take(Infinity)));
+export {curry, go, pipe, range, map, filter, reduce, take,flatten, flatMap, L}

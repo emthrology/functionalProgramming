@@ -1,4 +1,4 @@
-import {curry, go, pipe, map, range, filter, reduce, take, L} from './fx.js'
+import {curry, go, pipe, map, range, filter, reduce, take, L} from '../util/fx.js'
 
 /*
 이터러블 중심 프로그래밍에서의 지연 평가 (Lazy Evaluation)

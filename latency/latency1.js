@@ -1,4 +1,4 @@
-import {curry, go, pipe, range, map, filter, reduce, take, L} from './fx.js'
+import {curry, go, pipe, range, map, filter, reduce, take, L} from '../util/fx.js'
 
 const add = (a,b) => a + b;
 //---------------range----------------
