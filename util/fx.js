@@ -44,7 +44,6 @@ const reduce = curry((f, acc, iter) => {
   } else {
     iter = iter[Symbol.iterator]();
   }
-  iter = iter[Symbol.iterator]();
   let cur;
   while(!(cur = iter.next()).done) {
     const a = cur.value;
