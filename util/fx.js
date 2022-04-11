@@ -36,6 +36,15 @@ const filter = curry((f, iter) => {
   // }
   return res;
 });
+
+/*
+reduce: 비동기 처리 코드 추가
+유명함수를 사용하기 이전 코드에서는 프로미스 체인이 유지되면서
+이벤트 루프가 비동기 큐에 계속해서 머무르면서 성능저하가 일어나기 때문에
+유명함수를 사용하여 `비동기 처리가 필요한 시점`에서만 비동기 처리를 하는 것으로 이해를 했는데
+설명하신 의도와 맞는 방향일까요?? => Yes
+*/
+const go1 = (a,f) => a instanceof Promise ? a.then(f) : f(a); //go의 첫번째 인자로 promise 가 들어와도 ok
 const reduce = curry((f, acc, iter) => {
   //js reduce 초기값 생략 옵션
   if (!iter) {
@@ -44,15 +53,16 @@ const reduce = curry((f, acc, iter) => {
   } else {
     iter = iter[Symbol.iterator]();
   }
-  let cur;
-  while(!(cur = iter.next()).done) {
-    const a = cur.value;
-    acc = f(acc, a);
-  }
-  // for (const p of iter) {
-  //   acc = f(acc, p);
-  // }
-  return acc;
+  //일급시민으로서의 함수 : return function available
+  return go1(acc, function recur(acc) {
+    let cur;
+    while (!(cur = iter.next()).done) {
+      const a = cur.value;
+      acc = f(acc, a);
+      if (acc instanceof Promise) return acc.then(recur); //비동기 코드를 분기 및 재귀처리 : 재귀하면서 비동기일때만 태스크 큐 추가
+    }
+    return acc
+  });
 });
 const take = curry((l, iter) => {
   let res = [];
@@ -69,7 +79,12 @@ const take = curry((l, iter) => {
   // }
   return res;
 });
-
+const find = curry((f, iter) => go(
+  iter,
+  L.filter(f), //평가 보류
+  take(1), //invoke evaluation : 지연평가부분의 iter.next() 발동
+  ([a]) => a
+));
 const L = {};
 L.range = function* (l) {
   let i = -1;
@@ -112,4 +127,4 @@ const flatten = pipe(L.flatten,take(Infinity));
 L.flatMap = curry(pipe(L.map, L.flatten));
 //즉시평가형 flatMap
 const flatMap = curry(pipe(L.flatMap, take(Infinity)));
-export {curry, go, pipe, range, map, filter, reduce, take,flatten, flatMap, L}
+export {curry, go, pipe, range, map, filter, reduce, take, find, flatten, flatMap, L}
