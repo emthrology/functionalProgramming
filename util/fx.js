@@ -1,5 +1,6 @@
 const curry = f => (a,..._) => _.length? f(a, ..._) : (..._) => f(a, ..._);
 const go = (...args) => reduce((acc,curFn) => curFn(acc), args);
+const asyncGo = (a,f) => a instanceof Promise ? a.then(f) : f(a); //go의 첫번째 인자로 promise 가 들어와도 ok
 const pipe = (f,...fs) => (...as) => go(f(...as), ...fs);
 const range = l => {
   let i = -1;
@@ -44,7 +45,6 @@ reduce: 비동기 처리 코드 추가
 유명함수를 사용하여 `비동기 처리가 필요한 시점`에서만 비동기 처리를 하는 것으로 이해를 했는데
 설명하신 의도와 맞는 방향일까요?? => Yes
 */
-const go1 = (a,f) => a instanceof Promise ? a.then(f) : f(a); //go의 첫번째 인자로 promise 가 들어와도 ok
 const reduce = curry((f, acc, iter) => {
   //js reduce 초기값 생략 옵션
   if (!iter) {
@@ -54,7 +54,7 @@ const reduce = curry((f, acc, iter) => {
     iter = iter[Symbol.iterator]();
   }
   //일급시민으로서의 함수 : return function available
-  return go1(acc, function recur(acc) {
+  return asyncGo(acc, function recur(acc) {
     let cur;
     while (!(cur = iter.next()).done) {
       const a = cur.value;
@@ -64,20 +64,25 @@ const reduce = curry((f, acc, iter) => {
     return acc
   });
 });
+
+//take 할때 iter.next 가 비동기인 경우 resolve 하는 코드 추가
 const take = curry((l, iter) => {
   let res = [];
   iter = iter[Symbol.iterator]();
-  let cur;
-  while(!(cur = iter.next()).done) {
-    const a = cur.value;
-    res.push(a)
-    if (res.length === l) return res;
-  }
-  // for (const a of iter) {
-  //   res.push(a);
-  //   if (res.length === l) return res;
-  // }
-  return res;
+  return function recur() {
+    let cur;
+    while(!(cur = iter.next()).done) {
+      const a = cur.value;
+      if(a instanceof Promise)
+        return a.then(a => {
+          res.push(a);
+          return res.length === l ? res : recur();
+        });
+      res.push(a)
+      if (res.length === l) return res;
+    }
+    return res;
+  }();
 });
 const find = curry((f, iter) => go(
   iter,
@@ -94,13 +99,9 @@ L.range = function* (l) {
   }
 };
 L.map = curry(function* (f, iter) {
-  iter = iter[Symbol.iterator]();
-  let cur;
-  while(!(cur = iter.next()).done) {
-    const p = cur.value;
-    yield f(p);
-  }
-  // for (const a of iter) yield f(a);
+  for (const a of iter)
+    // yield f(a);
+    yield asyncGo(a,f);
 });
 L.filter = curry(function* (f, iter) {
   iter = iter[Symbol.iterator]();
