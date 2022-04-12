@@ -3,7 +3,9 @@ import {curry, go, pipe, range, map, filter, reduce, take, find, flatten, flatMa
 //fx.js 와 함께
 go(
   [Promise.resolve(1),Promise.resolve(2),Promise.resolve(3)],
-    L.map(a => Promise.resolve(a + 10)), //내부가 asyncGo로 구현되고있음 -> 던지는 인자 자체는 함수이므로 함수의 결과인 Promise<suspended> 가 리턴됨
+  //   [2,3,4],
+    L.map(a => Promise.resolve(a + 10)), //내부가 asyncGo로 구현되고있음 -> 던지는 인
+  // 자 자체는 함수이므로 함수의 결과인 Promise<suspended> 가 리턴됨
     take(2), //어찌되었든 take 는 이제 프로미스를 받아 resolve 할 수 있으므로 resolve 된 결과 리턴함
     console.log
 );
