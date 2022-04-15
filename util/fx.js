@@ -81,6 +81,7 @@ const reduce = curry((f, acc, iter) => {
   });
 });
 
+//take: l에 다다를때까지 iter 반복
 //take 할때 iter.next 가 비동기인 경우 resolve 하는 코드 추가
 const take = curry((l, iter) => {
   let res = [];

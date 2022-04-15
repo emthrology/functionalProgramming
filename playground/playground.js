@@ -1,4 +1,4 @@
-import {curry, go, pipe, map, range, filter, reduce, take,flatten,flatMap, L} from '../util/fx.js'
+import {curry, go, pipe, range, map, filter, reduce, take, find, flatten, flatMap, L} from '../util/fx.js'
 
 //즉시평가
 // go(range(10),
@@ -38,3 +38,58 @@ go(arr,
 )
 //어느부분까지 평가를 지연할 지 결정할 수 있다.
 //이 코드에서는 take 가 즉시평가형이므로 여기 도달하기 전까지는 평가가 지연된다
+
+
+//재택근무 자동배치
+//5개 요일에 4명씩 할당
+//각 인원을 2개 요일에 할당해야함
+//현재 인원은 10명
+// const list = [
+//   {...ppls},
+//   {...ppls},
+//   {...ppls},
+//   {...ppls},
+//   {...ppls},
+// ]
+const shuffle = arr => arr.sort(() => Math.random() - 0.5);
+
+const getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
+}
+console.log(getRandomInt(0,5))
+console.log(getRandomInt(0,5))
+console.log(getRandomInt(0,5))
+console.log(getRandomInt(0,5))
+console.log('----------------------')
+const test = ['a','b','c','d','e','f','g','h','i','j'];
+const res = [
+  ['a','b','i','j'],
+  ['e','f','g','h'],
+  ['a','b','c','d'],
+  ['e','f','g','h'],
+  ['i','j','c','d'],
+]
+
+const list = [
+  [],[],[],[],[]
+];
+
+
+//결과에 사람들 넣을때 : 요일 배열에 iter되는 el이 있으면 못넣음
+
+const makeDayList = pipe(
+  shuffle,
+  take(4),
+  console.log
+)
+makeDayList(test)
+// const solution = ppl => pipe(
+//   shuffle,
+//
+// )
+
+const count = list => {
+
+}
